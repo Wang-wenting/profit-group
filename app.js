@@ -18,6 +18,18 @@ const App = {
     return this.localDate(date);
   },
 
+  workWeekRange() {
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const day = today.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+    return { start: this.localDate(monday), end: this.localDate(friday) };
+  },
+
   async submit() {
     const name = document.getElementById('name').value;
     const date = document.getElementById('date').value;
@@ -49,7 +61,11 @@ const App = {
 
   periodLabel() {
     if (this.mode === 'day') return `${this.localDate()} · 今日实时战况`;
-    if (this.mode === 'week') return `${this.dateOffset(-6)} 至 ${this.localDate()}`;
+    if (this.mode === 'week') {
+      const { start, end } = this.workWeekRange();
+      return `${start} 至 ${end} · 工作周`;
+    }
+    if (this.mode === 'year') return `${new Date().getFullYear()} 年度汇总`;
     const now = new Date();
     return `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
   },
@@ -57,9 +73,12 @@ const App = {
   filterRows(rows) {
     if (this.mode === 'day') return rows.filter(row => row.date === this.localDate());
     if (this.mode === 'week') {
-      const start = this.dateOffset(-6);
-      const end = this.localDate();
+      const { start, end } = this.workWeekRange();
       return rows.filter(row => row.date >= start && row.date <= end);
+    }
+    if (this.mode === 'year') {
+      const year = String(new Date().getFullYear());
+      return rows.filter(row => row.date.startsWith(`${year}-`));
     }
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
