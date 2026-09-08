@@ -30,6 +30,11 @@ const App = {
     return { start: this.localDate(monday), end: this.localDate(friday) };
   },
 
+  yearRange() {
+    const year = new Date().getFullYear();
+    return { start: `${year}-01-01`, end: `${year}-12-31`, year };
+  },
+
   async submit() {
     const name = document.getElementById('name').value;
     const date = document.getElementById('date').value;
@@ -65,7 +70,7 @@ const App = {
       const { start, end } = this.workWeekRange();
       return `${start} 至 ${end} · 工作周`;
     }
-    if (this.mode === 'year') return `${new Date().getFullYear()} 年度汇总`;
+    if (this.mode === 'year') return `${this.yearRange().year} 年度汇总`;
     const now = new Date();
     return `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
   },
@@ -77,8 +82,8 @@ const App = {
       return rows.filter(row => row.date >= start && row.date <= end);
     }
     if (this.mode === 'year') {
-      const year = String(new Date().getFullYear());
-      return rows.filter(row => row.date.startsWith(`${year}-`));
+      const { start, end } = this.yearRange();
+      return rows.filter(row => row.date >= start && row.date <= end);
     }
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
